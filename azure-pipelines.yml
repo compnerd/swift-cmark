@@ -1,0 +1,109 @@
+trigger:
+- master
+
+jobs:
+  - job: macOS
+    pool:
+      vmImage: macOS-10.14
+    steps:
+      - checkout: self
+      - task: CMake@1
+        inputs:
+          workingDirectory: $(Build.BinariesDirectory)
+          cmakeArgs: -DCMAKE_BUILD_TYPE=RelWithDebInfo -S $(Build.SourcesDirectory)
+        displayName: Configure
+      - task: CMake@1
+        inputs:
+          cmakeArgs: --build $(Build.BinariesDirectory)
+        displayName: Build
+      - script: |
+          ctest --build-nocmake -V
+        displayName: Test
+        workingDirectory: $(Build.BinariesDirectory)
+
+  - job: ubuntu_18_04
+    displayName: Ubuntu 18.04
+    pool:
+      vmImage: ubuntu-18.04
+    steps:
+      - checkout: self
+      - task: UsePythonVersion@0
+        inputs:
+          addToPath: true
+          versionSpec: 3.x
+        name: python
+      - task: CMake@1
+        inputs:
+          workingDirectory: $(Build.BinariesDirectory)
+          cmakeArgs: -DCMAKE_BUILD_TYPE=RelWithDebInfo -S $(Build.SourcesDirectory)
+        displayName: Configure
+      - task: CMake@1
+        inputs:
+          cmakeArgs: --build $(Build.BinariesDirectory)
+        displayName: Build
+      - script: |
+          ctest --build-nocmake -V
+        displayName: Test
+        workingDirectory: $(Build.BinariesDirectory)
+
+  - job: vs2017
+    displayName: Windows (VS2017)
+    pool:
+      vmImage: VS2017-Win2016
+    steps:
+      - checkout: self
+      - task: BatchScript@1
+        inputs:
+          filename: C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat
+          arguments: -no_logo -arch=x64 -host_arch=x64
+          modifyEnvironment: true
+        displayName: VsDevCmd
+      - task: UsePythonVersion@0
+        inputs:
+          addToPath: true
+          versionSpec: 3.x
+        name: python
+      - task: CMake@1
+        inputs:
+          workingDirectory: $(Build.BinariesDirectory)
+          cmakeArgs: -DCMAKE_BUILD_TYPE=RelWithDebInfo -S $(Build.SourcesDirectory)
+        displayName: Configure
+      - task: CMake@1
+        inputs:
+          cmakeArgs: --build $(Build.BinariesDirectory)
+        displayName: Build
+      - script: |
+          ctest --build-nocmake -V
+        displayName: Test
+        workingDirectory: $(Build.BinariesDirectory)
+
+  - job: vs2019
+    displayName: Windows (VS2019)
+    pool:
+      vmImage: windows-2019
+    steps:
+      - checkout: self
+      - task: BatchScript@1
+        inputs:
+          filename: C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat
+          arguments: -no_logo -arch=x64 -host_arch=x64
+          modifyEnvironment: true
+        displayName: VsDevCmd
+      - task: UsePythonVersion@0
+        inputs:
+          addToPath: true
+          versionSpec: 3.x
+        name: python
+      - task: CMake@1
+        inputs:
+          workingDirectory: $(Build.BinariesDirectory)
+          cmakeArgs: -DCMAKE_BUILD_TYPE=RelWithDebInfo -S $(Build.SourcesDirectory)
+        displayName: Configure
+      - task: CMake@1
+        inputs:
+          cmakeArgs: --build $(Build.BinariesDirectory)
+        displayName: Build
+      - script: |
+          ctest --build-nocmake -V
+        displayName: Test
+        workingDirectory: $(Build.BinariesDirectory)
